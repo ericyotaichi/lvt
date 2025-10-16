@@ -1,0 +1,20 @@
+# Docker 数据库数据目录
+docker/db/data/
+backups/
+
+# 环境变量文件
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
