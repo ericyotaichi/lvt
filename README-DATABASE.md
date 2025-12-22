@@ -60,6 +60,40 @@ docker exec lvt_db mysqldump -u app -psecret app > backups/manual_backup.sql
 docker exec -i lvt_db mysql -u app -psecret app < backups/manual_backup.sql
 ```
 
+## 数据持久化保证
+
+数据库已配置为使用 Docker 命名卷（`db_data`），确保数据在以下情况下仍然保留：
+
+- ✅ 容器重启 (`docker-compose restart`)
+- ✅ 容器停止 (`docker-compose stop`)
+- ✅ 容器删除 (`docker-compose down`)
+- ✅ 系统重启
+- ✅ Docker 服务重启
+
+### 数据会丢失的情况
+
+⚠️ **只有在以下情况下数据才会丢失**：
+
+1. **使用 `-v` 参数删除卷**：
+   ```bash
+   docker-compose down -v  # ⚠️ 这会删除所有数据！
+   ```
+
+2. **手动删除卷**：
+   ```bash
+   docker volume rm lvt-starter-v2_db_data  # ⚠️ 这会删除所有数据！
+   ```
+
+3. **删除整个 Docker 数据目录**（极少见）
+
+### 检查数据库状态
+
+使用检查脚本验证数据库状态：
+
+```powershell
+.\scripts\check-db.ps1
+```
+
 ## 注意事项
 
 1. **定期备份**: 建议每天自动备份数据库
@@ -67,6 +101,8 @@ docker exec -i lvt_db mysql -u app -psecret app < backups/manual_backup.sql
 3. **数据安全**: 数据库卷数据存储在 Docker 管理的卷中，不会因为 `docker-compose down` 而丢失
 4. **完全删除**: 如果需要完全删除数据库数据，需要删除卷：
    ```bash
-   docker-compose down -v
+   docker-compose down -v  # ⚠️ 警告：这会删除所有数据！
    ```
+5. **容器重启**: 使用 `docker-compose restart` 或 `docker-compose down && docker-compose up -d` 不会丢失数据
+6. **健康检查**: 数据库容器已配置健康检查，确保数据库完全启动后才接受连接
 
