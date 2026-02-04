@@ -65,7 +65,7 @@ return [
         'heading' => '選擇方案並留下聯絡資料',
         'subheading' => '請選擇您想了解的方案並填寫基本資料，我們將盡快與您聯繫。',
         'select_plan' => '選擇方案',
-        'other' => '其他需求',
+        'other' => '其他',
         'contact_info' => '聯絡資料',
         'name_label' => '姓名',
         'phone_label' => '電話',

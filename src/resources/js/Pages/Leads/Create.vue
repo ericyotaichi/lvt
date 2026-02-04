@@ -20,7 +20,7 @@ const text = computed(() => {
       heading: 'Select a plan and leave your contact details',
       subheading: 'Choose the solution you want to learn about and share your contact info. We will get back to you soon.',
       selectPlan: 'Select Plan',
-      otherOption: 'Other Needs',
+      otherOption: 'Other',
       nameLabel: 'Name',
       namePlaceholder: 'John Doe',
       phoneLabel: 'Phone',
@@ -37,7 +37,7 @@ const text = computed(() => {
     heading: '選擇方案並留下聯絡資料',
     subheading: '請選擇您想了解的方案並填寫基本資料，我們將盡快與您聯繫。',
     selectPlan: '選擇方案',
-    otherOption: '其他需求',
+    otherOption: '其他',
     nameLabel: '姓名',
     namePlaceholder: '王小明',
     phoneLabel: '電話',
@@ -51,9 +51,8 @@ const text = computed(() => {
 
 const planOptions = computed(() => {
   const list = [...(props.plans || [])]
-  if (list.length === 0) {
-    list.push({ value: 'other', label: text.value.otherOption })
-  }
+  // 始終在最下方添加「其他」選項
+  list.push({ value: 'other', label: text.value.otherOption })
   return list
 })
 
