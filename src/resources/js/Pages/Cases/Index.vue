@@ -22,7 +22,7 @@ const { t } = useTranslations()
       <p class="text-sm text-gray-500" v-if="it.customer">{{ t('cases_section.customer') }}：{{ it.customer }}</p>
       <p class="text-gray-600 mt-1 line-clamp-2">{{ it.excerpt }}</p>
       <Link :href="route('cases.show', it.slug)" class="inline-block mt-3 text-blue-700 hover:underline">
-        查看詳情 →
+        {{ t('cases_section.view_details') }}
       </Link>
     </article>
   </div>

@@ -21,8 +21,14 @@ const { t } = useTranslations()
     </div>
     <h1 class="text-3xl font-bold">{{ props.item.title }}</h1>
     <p class="text-sm text-gray-500 mt-2" v-if="props.item.customer">{{ t('cases_section.customer') }}：{{ props.item.customer }}</p>
-    <div class="mt-3 text-gray-700 whitespace-pre-line">
-      {{ props.item.content || props.item.excerpt }}
+    <div class="mt-3 text-gray-700 leading-7">
+      <div v-if="props.item.content" v-html="props.item.content"></div>
+      <p v-else-if="props.item.excerpt" class="whitespace-pre-line">
+        {{ props.item.excerpt }}
+      </p>
+      <p v-else class="text-gray-500 text-sm italic">
+        {{ t('no_content') }}
+      </p>
     </div>
     <ul v-if="props.item.metrics?.length" class="mt-6 grid sm:grid-cols-2 gap-4">
       <li v-for="m in props.item.metrics" :key="m.label" class="rounded-xl border p-4">

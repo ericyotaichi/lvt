@@ -4,7 +4,7 @@ FROM php:8.3-fpm-alpine
 RUN apk add --no-cache bash git curl icu-dev libzip-dev zlib-dev oniguruma-dev \
     libpng-dev libjpeg-turbo-dev freetype-dev gmp-dev mariadb-client
 
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+    RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
  && docker-php-ext-install -j$(nproc) pdo_mysql mbstring exif pcntl bcmath gd intl zip
 
 # Composer（安裝到 PATH）

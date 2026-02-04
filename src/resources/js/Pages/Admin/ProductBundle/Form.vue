@@ -1,78 +1,68 @@
 <script setup>
 import { Head, useForm, router } from '@inertiajs/vue3'
-import { computed, watch } from 'vue'
+import { computed, watch, ref } from 'vue'
 import { useTranslations } from '@/composables/useTranslations'
+import RichTextEditor from '@/Components/RichTextEditor.vue'
 
 const props = defineProps({
   mode: { type: String, default: 'create' },          // 'create' | 'edit'
   product: { type: Object, default: null },
-  application: { type: Object, default: null },
-  case: { type: Object, default: null },
 })
 
 const { t } = useTranslations()
 
 const isDev = import.meta.env.DEV
 
+// 封面图片预览
+const coverPreview = ref(null)
+const coverInputRef = ref(null)
+
 const form = useForm({
-  // product
-  product: {
-    slug: props.product?.slug ?? '',
-    title: props.product?.title ?? '',
-    title_en: props.product?.title_en ?? '',
-    summary: props.product?.summary ?? '',
-    summary_en: props.product?.summary_en ?? '',
-    description: props.product?.description ?? '',
-    description_en: props.product?.description_en ?? '',
-    status: props.product?.status ?? 'draft',
-    sort: props.product?.sort ?? 0,
-    cover: null, // file
-  },
-  // application
-  application: {
-    slug: props.application?.slug ?? '',
-    title: props.application?.title ?? '',
-    title_en: props.application?.title_en ?? '',
-    excerpt: props.application?.excerpt ?? '',
-    excerpt_en: props.application?.excerpt_en ?? '',
-    content: props.application?.content ?? '',
-    content_en: props.application?.content_en ?? '',
-    status: props.application?.status ?? (props.product?.status ?? 'draft'),
-    sort: props.application?.sort ?? (props.product?.sort ?? 0),
-    cover: null,
-  },
-  // case
-  case: {
-    slug: props.case?.slug ?? '',
-    title: props.case?.title ?? '',
-    title_en: props.case?.title_en ?? '',
-    excerpt: props.case?.excerpt ?? '',
-    excerpt_en: props.case?.excerpt_en ?? '',
-    content: props.case?.content ?? '',
-    content_en: props.case?.content_en ?? '',
-    customer: props.case?.customer ?? '',
-    customer_en: props.case?.customer_en ?? '',
-    status: props.case?.status ?? (props.product?.status ?? 'draft'),
-    sort: props.case?.sort ?? (props.product?.sort ?? 0),
-    cover: null,
-  },
+  // product only
+  slug: props.product?.slug ?? '',
+  title: props.product?.title ?? '',
+  title_en: props.product?.title_en ?? '',
+  summary: props.product?.summary ?? '',
+  summary_en: props.product?.summary_en ?? '',
+  content: props.product?.content ?? '',
+  content_en: props.product?.content_en ?? '',
+  status: props.product?.status ?? 'draft',
+  sort: props.product?.sort ?? 0,
+  cover: null, // file
 })
 
-// 檔案資訊快速檢查
+// 處理封面圖片選擇
+const handleCoverChange = (event) => {
+  const file = event.target.files?.[0] ?? null
+  form.cover = file
+  
+  // 生成預覽
+  if (file) {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      coverPreview.value = e.target.result
+    }
+    reader.readAsDataURL(file)
+  } else {
+    coverPreview.value = null
+  }
+  
+  // 檔案資訊快速檢查
+  if (isDev && file) {
+    const kb = (file.size / 1024).toFixed(1)
+    const mb = (file.size / 1024 / 1024).toFixed(2)
+    console.log(`[FILE] cover: ${file.name} | ${kb} KB (${mb} MB) | type=${file.type}`)
+  }
+}
+
+// 檔案資訊快速檢查（保留用於提交時）
 const logFiles = () => {
   if (!isDev) return
-  const list = [
-    ['product.cover', form.product.cover],
-    ['application.cover', form.application.cover],
-    ['case.cover', form.case.cover],
-  ]
-  list.forEach(([label, f]) => {
-    if (f) {
-      const kb = (f.size / 1024).toFixed(1)
-      const mb = (f.size / 1024 / 1024).toFixed(2)
-      console.log(`[FILE] ${label}: ${f.name} | ${kb} KB (${mb} MB) | type=${f.type}`)
-    }
-  })
+  if (form.cover) {
+    const kb = (form.cover.size / 1024).toFixed(1)
+    const mb = (form.cover.size / 1024 / 1024).toFixed(2)
+    console.log(`[FILE] cover: ${form.cover.name} | ${kb} KB (${mb} MB) | type=${form.cover.type}`)
+  }
 }
 
 // 表單變更監聽（僅 dev 印出）
@@ -125,198 +115,106 @@ export default { layout: AppLayout }
 </script>
 
 <template>
-  <Head :title="props.mode === 'create' ? t('admin.form.create_bundle') : t('admin.form.edit_bundle')" />
+  <Head :title="props.mode === 'create' ? '新增產品與服務' : '編輯產品與服務'" />
 
   <h1 class="text-2xl font-bold mb-6">
-    {{ props.mode === 'create' ? t('admin.form.create_bundle') : t('admin.form.edit_bundle') }}
+    {{ props.mode === 'create' ? '新增產品與服務' : '編輯產品與服務' }}
   </h1>
 
-  <form @submit.prevent="submit" class="space-y-10">
-    <!-- 產品 -->
+  <form @submit.prevent="submit" class="space-y-6">
+    <!-- 產品與服務 -->
     <section class="rounded-2xl border bg-white p-6">
-      <h2 class="text-xl font-semibold">{{ t('admin.form.product') }}</h2>
+      <h2 class="text-xl font-semibold mb-4">產品與服務內容</h2>
       <div class="mt-4 grid gap-4 md:grid-cols-2">
         <div>
-          <label class="block text-sm font-medium">{{ t('admin.form.product_name') }} (中文) *</label>
-          <input v-model="form.product.title" type="text" class="mt-1 w-full rounded-xl border px-3 py-2" required />
-          <p v-if="form.errors['product.title']" class="text-sm text-red-600">{{ form.errors['product.title'] }}</p>
+          <label class="block text-sm font-medium">產品名稱 (中文) *</label>
+          <input v-model="form.title" type="text" class="mt-1 w-full rounded-xl border px-3 py-2" required />
+          <p v-if="form.errors.title" class="text-sm text-red-600">{{ form.errors.title }}</p>
         </div>
         <div>
-          <label class="block text-sm font-medium">{{ t('admin.form.product_name') }} (English)</label>
-          <input v-model="form.product.title_en" type="text" class="mt-1 w-full rounded-xl border px-3 py-2" />
-          <p v-if="form.errors['product.title_en']" class="text-sm text-red-600">{{ form.errors['product.title_en'] }}</p>
+          <label class="block text-sm font-medium">產品名稱 (English)</label>
+          <input v-model="form.title_en" type="text" class="mt-1 w-full rounded-xl border px-3 py-2" />
+          <p v-if="form.errors.title_en" class="text-sm text-red-600">{{ form.errors.title_en }}</p>
         </div>
         <div>
-          <label class="block text-sm font-medium">{{ t('admin.form.slug') }}</label>
-          <input v-model="form.product.slug" type="text" class="mt-1 w-full rounded-xl border px-3 py-2" :placeholder="t('admin.form.slug_placeholder')" />
-          <p v-if="form.errors['product.slug']" class="text-sm text-red-600">{{ form.errors['product.slug'] }}</p>
+          <label class="block text-sm font-medium">Slug</label>
+          <input v-model="form.slug" type="text" class="mt-1 w-full rounded-xl border px-3 py-2" placeholder="留空自動產生" />
+          <p v-if="form.errors.slug" class="text-sm text-red-600">{{ form.errors.slug }}</p>
         </div>
         <div>
-          <label class="block text-sm font-medium">{{ t('admin.form.status') }}</label>
-          <select v-model="form.product.status" class="mt-1 w-full rounded-xl border px-3 py-2">
-            <option value="draft">{{ t('admin.form.draft') }}</option>
-            <option value="published">{{ t('admin.form.published') }}</option>
+          <label class="block text-sm font-medium">狀態</label>
+          <select v-model="form.status" class="mt-1 w-full rounded-xl border px-3 py-2">
+            <option value="draft">草稿</option>
+            <option value="published">已發布</option>
           </select>
         </div>
-        <div class="md:col-span-2">
-          <label class="block text-sm font-medium">{{ t('admin.form.summary') }} (中文)</label>
-          <input v-model="form.product.summary" type="text" class="mt-1 w-full rounded-xl border px-3 py-2" />
-        </div>
-        <div class="md:col-span-2">
-          <label class="block text-sm font-medium">{{ t('admin.form.summary') }} (English)</label>
-          <input v-model="form.product.summary_en" type="text" class="mt-1 w-full rounded-xl border px-3 py-2" />
-        </div>
-        <div class="md:col-span-2">
-          <label class="block text-sm font-medium">{{ t('admin.form.content') }} (中文)</label>
-          <textarea v-model="form.product.description" class="mt-1 w-full rounded-xl border px-3 py-2" rows="4"></textarea>
-        </div>
-        <div class="md:col-span-2">
-          <label class="block text-sm font-medium">{{ t('admin.form.content') }} (English)</label>
-          <textarea v-model="form.product.description_en" class="mt-1 w-full rounded-xl border px-3 py-2" rows="4"></textarea>
-        </div>
         <div>
-          <label class="block text-sm font-medium">{{ t('admin.form.sort') }}</label>
-          <input v-model.number="form.product.sort" type="number" class="mt-1 w-full rounded-xl border px-3 py-2" />
+          <label class="block text-sm font-medium">排序</label>
+          <input v-model.number="form.sort" type="number" class="mt-1 w-full rounded-xl border px-3 py-2" />
         </div>
         <div class="md:col-span-2">
-          <label class="block text-sm font-medium">{{ t('admin.form.cover') }}</label>
-          <input type="file" accept="image/*" @change="e => form.product.cover = e.target.files?.[0] ?? null" />
-          <p v-if="form.errors['product.cover']" class="text-sm text-red-600">{{ form.errors['product.cover'] }}</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- 應用 -->
-    <section class="rounded-2xl border bg-white p-6">
-      <h2 class="text-xl font-semibold">{{ t('admin.form.application') }}</h2>
-      <p class="text-sm text-gray-500">{{ t('admin.form.application_note') }}</p>
-      <div class="mt-4 grid gap-4 md:grid-cols-2">
-        <div>
-          <label class="block text-sm font-medium">{{ t('admin.form.title') }} (中文)</label>
-          <input v-model="form.application.title" type="text" class="mt-1 w-full rounded-xl border px-3 py-2" />
-          <p v-if="form.errors['application.title']" class="text-sm text-red-600">{{ form.errors['application.title'] }}</p>
-        </div>
-        <div>
-          <label class="block text-sm font-medium">{{ t('admin.form.title') }} (English)</label>
-          <input v-model="form.application.title_en" type="text" class="mt-1 w-full rounded-xl border px-3 py-2" />
-          <p v-if="form.errors['application.title_en']" class="text-sm text-red-600">{{ form.errors['application.title_en'] }}</p>
-        </div>
-        <div>
-          <label class="block text-sm font-medium">{{ t('admin.form.slug') }}</label>
-          <input v-model="form.application.slug" type="text" class="mt-1 w-full rounded-xl border px-3 py-2" :placeholder="t('admin.form.slug_placeholder')" />
-        </div>
-        <div>
-          <label class="block text-sm font-medium">{{ t('admin.form.status') }}</label>
-          <select v-model="form.application.status" class="mt-1 w-full rounded-xl border px-3 py-2">
-            <option value="draft">{{ t('admin.form.draft') }}</option>
-            <option value="published">{{ t('admin.form.published') }}</option>
-          </select>
+          <label class="block text-sm font-medium">摘要 (中文)</label>
+          <input v-model="form.summary" type="text" class="mt-1 w-full rounded-xl border px-3 py-2" />
         </div>
         <div class="md:col-span-2">
-          <label class="block text-sm font-medium">{{ t('admin.form.summary') }} (中文)</label>
-          <input v-model="form.application.excerpt" type="text" class="mt-1 w-full rounded-xl border px-3 py-2" />
+          <label class="block text-sm font-medium">摘要 (English)</label>
+          <input v-model="form.summary_en" type="text" class="mt-1 w-full rounded-xl border px-3 py-2" />
         </div>
         <div class="md:col-span-2">
-          <label class="block text-sm font-medium">{{ t('admin.form.summary') }} (English)</label>
-          <input v-model="form.application.excerpt_en" type="text" class="mt-1 w-full rounded-xl border px-3 py-2" />
+          <label class="block text-sm font-medium mb-2">內容 (中文) - 富文本編輯</label>
+          <RichTextEditor v-model="form.content" placeholder="請輸入內容..." />
+          <p v-if="form.errors.content" class="text-sm text-red-600 mt-1">{{ form.errors.content }}</p>
         </div>
         <div class="md:col-span-2">
-          <label class="block text-sm font-medium">{{ t('admin.form.content') }} (中文)</label>
-          <textarea v-model="form.application.content" class="mt-1 w-full rounded-xl border px-3 py-2" rows="4"></textarea>
+          <label class="block text-sm font-medium mb-2">內容 (English) - 富文本編輯</label>
+          <RichTextEditor v-model="form.content_en" placeholder="Please enter content..." />
+          <p v-if="form.errors.content_en" class="text-sm text-red-600 mt-1">{{ form.errors.content_en }}</p>
         </div>
         <div class="md:col-span-2">
-          <label class="block text-sm font-medium">{{ t('admin.form.content') }} (English)</label>
-          <textarea v-model="form.application.content_en" class="mt-1 w-full rounded-xl border px-3 py-2" rows="4"></textarea>
-        </div>
-        <div>
-          <label class="block text-sm font-medium">{{ t('admin.form.sort') }}</label>
-          <input v-model.number="form.application.sort" type="number" class="mt-1 w-full rounded-xl border px-3 py-2" />
-        </div>
-        <div class="md:col-span-2">
-          <label class="block text-sm font-medium">{{ t('admin.form.cover') }}</label>
-          <input type="file" accept="image/*" @change="e => form.application.cover = e.target.files?.[0] ?? null" />
-          <p v-if="form.errors['application.cover']" class="text-sm text-red-600">{{ form.errors['application.cover'] }}</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- 案例 -->
-    <section class="rounded-2xl border bg-white p-6">
-      <h2 class="text-xl font-semibold">{{ t('admin.form.case') }}</h2>
-      <p class="text-sm text-gray-500">{{ t('admin.form.case_note') }}</p>
-      <div class="mt-4 grid gap-4 md:grid-cols-2">
-        <div>
-          <label class="block text-sm font-medium">{{ t('admin.form.title') }} (中文)</label>
-          <input v-model="form.case.title" type="text" class="mt-1 w-full rounded-xl border px-3 py-2" />
-        </div>
-        <div>
-          <label class="block text-sm font-medium">{{ t('admin.form.title') }} (English)</label>
-          <input v-model="form.case.title_en" type="text" class="mt-1 w-full rounded-xl border px-3 py-2" />
-        </div>
-        <div>
-          <label class="block text-sm font-medium">{{ t('admin.form.slug') }}</label>
-          <input v-model="form.case.slug" type="text" class="mt-1 w-full rounded-xl border px-3 py-2" :placeholder="t('admin.form.slug_placeholder')" />
-        </div>
-        <div>
-          <label class="block text-sm font-medium">{{ t('admin.form.status') }}</label>
-          <select v-model="form.case.status" class="mt-1 w-full rounded-xl border px-3 py-2">
-            <option value="draft">{{ t('admin.form.draft') }}</option>
-            <option value="published">{{ t('admin.form.published') }}</option>
-          </select>
-        </div>
-        <div class="md:col-span-2">
-          <label class="block text-sm font-medium">{{ t('admin.form.summary') }} (中文)</label>
-          <input v-model="form.case.excerpt" type="text" class="mt-1 w-full rounded-xl border px-3 py-2" />
-        </div>
-        <div class="md:col-span-2">
-          <label class="block text-sm font-medium">{{ t('admin.form.summary') }} (English)</label>
-          <input v-model="form.case.excerpt_en" type="text" class="mt-1 w-full rounded-xl border px-3 py-2" />
-        </div>
-        <div class="md:col-span-2">
-          <label class="block text-sm font-medium">{{ t('admin.form.content') }} (中文)</label>
-          <textarea v-model="form.case.content" class="mt-1 w-full rounded-xl border px-3 py-2" rows="4"></textarea>
-        </div>
-        <div class="md:col-span-2">
-          <label class="block text-sm font-medium">{{ t('admin.form.content') }} (English)</label>
-          <textarea v-model="form.case.content_en" class="mt-1 w-full rounded-xl border px-3 py-2" rows="4"></textarea>
-        </div>
-        <div>
-          <label class="block text-sm font-medium">{{ t('admin.form.customer_name') }} (中文)</label>
-          <input v-model="form.case.customer" type="text" class="mt-1 w-full rounded-xl border px-3 py-2" />
-        </div>
-        <div>
-          <label class="block text-sm font-medium">{{ t('admin.form.customer_name') }} (English)</label>
-          <input v-model="form.case.customer_en" type="text" class="mt-1 w-full rounded-xl border px-3 py-2" />
-        </div>
-        <div>
-          <label class="block text-sm font-medium">{{ t('admin.form.sort') }}</label>
-          <input v-model.number="form.case.sort" type="number" class="mt-1 w-full rounded-xl border px-3 py-2" />
-        </div>
-        <div class="md:col-span-2">
-          <label class="block text-sm font-medium">{{ t('admin.form.cover') }}</label>
-          <input type="file" accept="image/*" @change="e => form.case.cover = e.target.files?.[0] ?? null" />
-          <p v-if="form.errors['case.cover']" class="text-sm text-red-600">{{ form.errors['case.cover'] }}</p>
+          <label class="block text-sm font-medium">封面圖片</label>
+          <input 
+            ref="coverInputRef"
+            type="file" 
+            accept="image/*" 
+            @change="handleCoverChange" 
+            class="mt-1 w-full rounded-xl border px-3 py-2"
+          />
+          <p v-if="form.errors.cover" class="text-sm text-red-600">{{ form.errors.cover }}</p>
+          
+          <!-- 顯示預覽：優先顯示新選擇的圖片，否則顯示現有封面 -->
+          <div v-if="coverPreview || (props.product?.cover_url && !form.cover)" class="mt-2">
+            <p class="text-sm text-gray-500 mb-1">{{ coverPreview ? '預覽' : '目前封面' }}：</p>
+            <div class="relative inline-block">
+              <img 
+                :src="coverPreview || props.product.cover_url" 
+                alt="Cover preview" 
+                class="w-48 h-48 object-cover rounded-lg border"
+              />
+              <button
+                v-if="coverPreview"
+                type="button"
+                @click="coverPreview = null; form.cover = null; coverInputRef.value = ''"
+                class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 text-sm"
+              >
+                ×
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
     <div class="flex gap-2">
       <button
-        type="button"
+        type="submit"
         :disabled="form.processing"
-        @click="submit"
         class="px-4 py-2 rounded-xl bg-green-600 text-white hover:bg-green-700 disabled:opacity-60"
       >
-        {{ form.processing ? t('admin.form.saving') : t('admin.form.save') }}
+        {{ form.processing ? '儲存中…' : '儲存' }}
       </button>
       <button type="button" @click="backToIndex" class="px-4 py-2 rounded-xl border hover:bg-gray-50">
-        {{ t('admin.form.back_to_list') }}
+        返回列表
       </button>
-      <!-- 臨時 debug 按鈕（用完可刪） -->
-      <!-- <button type="button" class="px-3 py-1.5 border rounded"
-              @click="() => { console.log('[DEBUG] now=', form.data()); logFiles(); }">
-        console 檢查
-      </button> -->
     </div>
   </form>
 </template>

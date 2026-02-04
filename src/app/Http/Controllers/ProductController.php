@@ -11,23 +11,30 @@ class ProductController extends Controller
     {
         try {
             $locale = app()->getLocale();
-            $items = Product::where('status', 'published')
+            $products = Product::where('status', 'published')
                 ->orderBy('sort')
+                ->orderByDesc('id')
                 ->get()
-                ->map(function ($item) use ($locale) {
+                ->map(function ($product) use ($locale) {
                     return [
-                        'id' => $item->id,
-                        'name' => ($locale === 'en' && !empty($item->title_en)) ? $item->title_en : $item->title,
-                        'slug' => $item->slug,
-                        'summary' => ($locale === 'en' && !empty($item->summary_en)) ? $item->summary_en : $item->summary,
-                        'cover_url' => $item->cover_url,
-                        'sort' => $item->sort,
+                        'id' => $product->id,
+                        'title' => ($locale === 'en' && !empty($product->title_en)) ? $product->title_en : $product->title,
+                        'slug' => $product->slug,
+                        'summary' => ($locale === 'en' && !empty($product->summary_en)) ? $product->summary_en : $product->summary,
+                        'content' => ($locale === 'en' && !empty($product->content_en)) ? $product->content_en : $product->content,
+                        'cover_url' => $product->cover_url,
                     ];
-                });
+                })
+                ->values()
+                ->toArray();
 
-            return Inertia::render('Products/Index', ['items' => $items]);
+            return Inertia::render('Products/Index', [
+                'items' => $products,
+            ]);
         } catch (\Throwable $e) {
-            return Inertia::render('Products/Index', ['items' => []]);
+            return Inertia::render('Products/Index', [
+                'items' => [],
+            ]);
         }
     }
 
@@ -37,11 +44,6 @@ class ProductController extends Controller
             $product = Product::query()
                 ->where('slug', $slug)
                 ->where('status', 'published')
-                ->with(['applications' => function ($q) {
-                    $q->where('applications.status', 'published')
-                      ->orderBy('applications.sort')
-                      ->orderByDesc('applications.updated_at');
-                }])
                 ->firstOrFail();
 
             $locale = app()->getLocale();
@@ -53,19 +55,10 @@ class ProductController extends Controller
                     'name'       => ($locale === 'en' && !empty($product->title_en)) ? $product->title_en : $product->title,
                     'summary'    => ($locale === 'en' && !empty($product->summary_en)) ? $product->summary_en : $product->summary,
                     'description' => ($locale === 'en' && !empty($product->description_en)) ? $product->description_en : $product->description,
-                    'content'    => $product->content,
+                    'content'    => ($locale === 'en' && !empty($product->content_en)) ? $product->content_en : $product->content,
                     'cover_url'  => $product->cover_url,
+                    'category'   => $product->category,
                 ],
-                'relatedApplications' => $product->applications
-                    ->map(function($a) use ($locale) {
-                        return [
-                            'id'       => $a->id,
-                            'slug'     => $a->slug,
-                            'title'    => ($locale === 'en' && !empty($a->title_en)) ? $a->title_en : $a->title,
-                            'excerpt'  => ($locale === 'en' && !empty($a->excerpt_en)) ? $a->excerpt_en : $a->excerpt,
-                            'cover_url' => $a->cover_url,
-                        ];
-                    })->values(),
             ]);
         } catch (\Throwable $e) {
             abort(404);

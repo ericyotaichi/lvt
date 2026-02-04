@@ -26,7 +26,7 @@
                 </p>
                 <div class="mt-6 flex flex-wrap gap-3">
                     <a href="/products" class="px-4 py-2 rounded-xl bg-green-600 text-white hover:bg-green-700">探索產品與服務</a>
-                    <a href="/tech" class="px-4 py-2 rounded-xl border hover:bg-white">核心技術</a>
+             
                 </div>
             </div>
             <div class="relative">

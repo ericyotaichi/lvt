@@ -4,7 +4,19 @@ use Illuminate\Database\Eloquent\Model;
 
 class Application extends Model
 {
-    protected $fillable = ['product_id','slug','title','title_en','excerpt','excerpt_en','content','content_en','cover_url','status','sort'];
+    protected $fillable = [
+        'product_id',
+        'slug',
+        'title',
+        'title_en',
+        'excerpt',
+        'excerpt_en',
+        'content',
+        'content_en',
+        'cover_url',
+        'status',
+        'sort'
+    ];
 
     public function product() { return $this->belongsTo(Product::class); }
 

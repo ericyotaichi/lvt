@@ -18,7 +18,7 @@ const navItems = computed(() => {
       { label: '核心技術', href: '/tech' },
       { label: '產品與服務', href: '/products' },
       { label: '應用場域', href: '/applications' },
-      // { label: '案例說明', href: '/cases' },
+      { label: '案例說明', href: '/cases' },
       { label: '聯絡我們', href: '/lead' },
     ],
     en: [
@@ -27,7 +27,7 @@ const navItems = computed(() => {
       { label: 'Core Technology', href: '/tech' },
       { label: 'Products & Services', href: '/products' },
       { label: 'Applications', href: '/applications' },
-      // { label: 'Case Studies', href: '/cases' },
+      { label: 'Case Studies', href: '/cases' },
       { label: 'Contact Us', href: '/lead' },
     ],
   }
@@ -63,7 +63,10 @@ const footerContent = computed(() => {
           <div class="size-8 md:size-10 lg:size-12">
             <img :src="logo" class="w-full h-full object-contain" />
           </div>
-          <span class="font-semibold text-base md:text-xl lg:text-2xl tracking-wide">
+          <span v-if="locale === 'en'" class="font-semibold text-sm md:text-base lg:text-lg tracking-wide whitespace-nowrap">
+            Chun Yuan
+          </span>
+          <span v-else class="font-semibold text-base md:text-xl lg:text-2xl tracking-wide">
             村源科技
           </span>
         </Link>

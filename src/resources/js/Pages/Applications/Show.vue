@@ -21,8 +21,14 @@ const { t } = useTranslations()
       <img v-if="props.item.cover_url" :src="props.item.cover_url" class="w-full h-full object-cover" />
     </div>
     <h1 class="text-3xl font-bold">{{ props.item.title }}</h1>
-    <div class="mt-3 text-gray-700 whitespace-pre-line">
-      {{ props.item.content || props.item.excerpt }}
+    <div class="mt-3 text-gray-700 leading-7">
+      <div v-if="props.item.content" v-html="props.item.content"></div>
+      <p v-else-if="props.item.excerpt" class="whitespace-pre-line">
+        {{ props.item.excerpt }}
+      </p>
+      <p v-else class="text-gray-500 text-sm italic">
+        {{ t('no_content') }}
+      </p>
     </div>
   </article>
 

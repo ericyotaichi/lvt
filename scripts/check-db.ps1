@@ -64,3 +64,9 @@ Write-Host "`n=== 检查完成 ===" -ForegroundColor Cyan
 Write-Host "`n提示: 使用 'docker-compose down' 不会删除数据（卷会保留）" -ForegroundColor Yellow
 Write-Host "警告: 使用 'docker-compose down -v' 会删除所有数据！" -ForegroundColor Red
 
+
+
+
+
+
+

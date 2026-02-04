@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\CarouselSlide;
+use App\Models\TechPage;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Str;
 
 class HomeController extends Controller
 {
@@ -14,18 +16,17 @@ class HomeController extends Controller
     {
         try {
             $locale = app()->getLocale();
-            // 依你的欄位調整：title / slug / summary / cover_url / status / sort
-            $latest = Product::where('status', 'published')
-                ->orderBy('sort')          // 先依 sort
-                ->orderByDesc('id')        // 再依 id 新到舊
-                ->take(3)
+            
+            $products = Product::where('status', 'published')
+                ->orderBy('sort')
+                ->orderByDesc('id')
                 ->get()
                 ->map(function ($item) use ($locale) {
                     return [
                         'id' => $item->id,
                         'title' => ($locale === 'en' && !empty($item->title_en)) ? $item->title_en : $item->title,
-                        'slug' => $item->slug,
                         'summary' => ($locale === 'en' && !empty($item->summary_en)) ? $item->summary_en : $item->summary,
+                        'content' => ($locale === 'en' && !empty($item->content_en)) ? $item->content_en : $item->content,
                         'cover_url' => $item->cover_url,
                     ];
                 });
@@ -52,21 +53,28 @@ class HomeController extends Controller
                 $carouselSlides = [];
             }
 
+            $techData = TechPage::getContent($locale);
+            if ($techData) {
+                $techData['excerpt'] = Str::limit(strip_tags($techData['content'] ?? ''), 200);
+            }
+
             return Inertia::render('Home', [
-                'latestProducts' => $latest,
+                'products' => $products,
                 'carouselSlides' => $carouselSlides,
+                'tech' => $techData,
             ]);
         } catch (QueryException $e) {
             Log::error("Error fetching products for home page: " . $e->getMessage());
             return Inertia::render('Home', [
-                'latestProducts' => [],
+                'products' => [],
                 'carouselSlides' => [],
+                'tech' => null,
             ]);
         } catch (\Throwable $e) {
-            // 如果数据库连接失败，返回空的产品列表
             return Inertia::render('Home', [
-                'latestProducts' => [],
+                'products' => [],
                 'carouselSlides' => [],
+                'tech' => null,
             ]);
         }
     }

@@ -2,6 +2,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Application;
+use App\Models\Product;
 use Inertia\Inertia;
 
 class ApplicationController extends Controller
@@ -10,8 +11,52 @@ class ApplicationController extends Controller
     {
         try {
             $locale = app()->getLocale();
-            $items = Application::where('status','published')
-                ->orderBy('id','desc')
+            $products = Product::where('status', 'published')
+                ->orderBy('sort')
+                ->orderByDesc('id')
+                ->get()
+                ->map(function ($product) use ($locale) {
+                    return [
+                        'id' => $product->id,
+                        'title' => ($locale === 'en' && !empty($product->title_en)) ? $product->title_en : $product->title,
+                    ];
+                })
+                ->values();
+
+            $productIds = $products->pluck('id')->all();
+            $applications = Application::where('status', 'published')
+                ->whereIn('product_id', $productIds)
+                ->orderBy('sort')
+                ->orderByDesc('id')
+                ->get()
+                ->groupBy('product_id');
+
+            $applicationsByCategory = [];
+            foreach ($products as $product) {
+                $items = ($applications[$product['id']] ?? collect())
+                    ->map(function ($item) use ($locale) {
+                        return [
+                            'id' => $item->id,
+                            'title' => ($locale === 'en' && !empty($item->title_en)) ? $item->title_en : $item->title,
+                            'slug' => $item->slug,
+                            'excerpt' => ($locale === 'en' && !empty($item->excerpt_en)) ? $item->excerpt_en : $item->excerpt,
+                            'cover_url' => $item->cover_url,
+                        ];
+                    })
+                    ->values()
+                    ->toArray();
+
+                $applicationsByCategory[(string) $product['id']] = [
+                    'categoryLabel' => $product['title'],
+                    'items' => $items,
+                    'empty' => empty($items),
+                ];
+            }
+
+            $uncategorized = Application::where('status', 'published')
+                ->whereNull('product_id')
+                ->orderBy('sort')
+                ->orderByDesc('id')
                 ->get()
                 ->map(function ($item) use ($locale) {
                     return [
@@ -21,10 +66,31 @@ class ApplicationController extends Controller
                         'excerpt' => ($locale === 'en' && !empty($item->excerpt_en)) ? $item->excerpt_en : $item->excerpt,
                         'cover_url' => $item->cover_url,
                     ];
-                });
-            return Inertia::render('Applications/Index', ['items' => $items]);
+                })
+                ->values()
+                ->toArray();
+
+            if (!empty($uncategorized)) {
+                $applicationsByCategory['uncategorized'] = [
+                    'categoryLabel' => $locale === 'en' ? 'Uncategorized' : '未分類',
+                    'items' => $uncategorized,
+                    'empty' => false,
+                ];
+                $products->push([
+                    'id' => 'uncategorized',
+                    'title' => $locale === 'en' ? 'Uncategorized' : '未分類',
+                ]);
+            }
+
+            return Inertia::render('Applications/Index', [
+                'applicationsByCategory' => $applicationsByCategory,
+                'categories' => $products,
+            ]);
         } catch (\Throwable $e) {
-            return Inertia::render('Applications/Index', ['items' => []]);
+            return Inertia::render('Applications/Index', [
+                'applicationsByCategory' => [],
+                'categories' => [],
+            ]);
         }
     }
 

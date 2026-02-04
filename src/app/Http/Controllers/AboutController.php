@@ -13,7 +13,7 @@ class AboutController extends Controller
         try {
             $locale = app()->getLocale();
             $aboutData = AboutPage::getContent($locale);
-            
+
             return Inertia::render('About', [
                 'about' => $aboutData,
             ]);

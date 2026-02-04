@@ -1,7 +1,8 @@
 <script setup>
 import { Head, Link, router, usePage } from '@inertiajs/vue3'
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed } from 'vue'
 import { useTranslations } from '@/composables/useTranslations'
+import AppLayout from '@/Layouts/AppLayout.vue'
 
 const props = defineProps({
   filters: Object,
@@ -26,13 +27,13 @@ const doSearch = () => {
 
 const confirmDelete = (productId, productTitle) => {
   if (confirm(locale.value === 'en' 
-    ? `Are you sure you want to delete "${productTitle || 'this article'}"? This action cannot be undone.`
-    : `確定要刪除「${productTitle || '此文章'}」嗎？此操作無法復原。`)) {
-    deleteArticle(productId)
+    ? `Are you sure you want to delete "${productTitle || 'this product'}"? This action cannot be undone.`
+    : `確定要刪除「${productTitle || '此產品'}」嗎？此操作無法復原。`)) {
+    deleteProduct(productId)
   }
 }
 
-const deleteArticle = (productId) => {
+const deleteProduct = (productId) => {
   deletingId.value = productId
   router.delete(route('admin.products.destroy', productId), {
     preserveScroll: true,
@@ -41,49 +42,23 @@ const deleteArticle = (productId) => {
     },
     onError: () => {
       deletingId.value = null
-      alert(locale.value === 'en' ? 'Failed to delete article' : '刪除文章失敗')
+      alert(locale.value === 'en' ? 'Failed to delete product' : '刪除產品失敗')
     },
   })
 }
 
-/** ---------- Dev console：像 DD() 一樣把資料全部印出 ---------- */
-const dumpAll = (where = 'mounted') => {
-  // 全部 props
-  console.group(`[${where}] props`)
-  console.log('props', props)
-  console.log('props.items', props.items)
-  console.log('props.items.data', props.items?.data)
-  console.table(props.items?.data ?? [])
-  ;(props.items?.data ?? []).forEach((row, i) => {
-    console.log(`row#${i}`, {
-      slug: row.slug,
-      product_title: row.product_title,
-      application_title: row.application_title,
-      case_title: row.case_title,
-      product_status: row.product_status,
-      application_status: row.application_status,
-      case_status: row.case_status,
-    })
-  })
-  console.groupEnd()
+</script>
 
-  // 方便在 Console 操作
-  window.$props = page.props.value
-  window.$rows  = props.items?.data ?? []
-}
-
-onMounted(() => dumpAll('mounted'))
-
-// 後端重新丟資料（切頁／搜尋）時重印
-watch(() => props.items, () => dumpAll('items updated'), { deep: true })
+<script>
+export default { layout: AppLayout }
 </script>
 
 <template>
   <Head :title="t('admin.articles.title')" />
-  <div class="max-w-7xl mx-auto px-6 md:px-12 lg:px-16 xl:px-24 py-8">
+  <div class="max-w-7xl mx-auto">
     <header class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
       <h1 class="text-2xl font-bold">{{ t('admin.articles.subtitle') }}</h1>
-          <div class="flex gap-2">
+          <div class="flex gap-2 flex-wrap">
             <Link :href="route('admin.carousel.index')" class="px-4 py-2 rounded-xl border hover:bg-gray-50">
               {{ locale === 'en' ? 'Carousel' : '輪播管理' }}
             </Link>
@@ -93,8 +68,20 @@ watch(() => props.items, () => dumpAll('items updated'), { deep: true })
             <Link :href="route('admin.about.index')" class="px-4 py-2 rounded-xl border hover:bg-gray-50">
               {{ locale === 'en' ? 'About Us' : '關於我們' }}
             </Link>
+            <Link :href="route('admin.tech.index')" class="px-4 py-2 rounded-xl border hover:bg-gray-50">
+              {{ locale === 'en' ? 'Core Technology' : '核心技術' }}
+            </Link>
+            <Link :href="route('admin.applications.index')" class="px-4 py-2 rounded-xl border hover:bg-gray-50">
+              {{ locale === 'en' ? 'Applications' : '應用場域' }}
+            </Link>
+            <Link :href="route('admin.cases.index')" class="px-4 py-2 rounded-xl border hover:bg-gray-50">
+              {{ locale === 'en' ? 'Cases' : '案例說明' }}
+            </Link>
+            <Link :href="route('admin.contact.index')" class="px-4 py-2 rounded-xl border hover:bg-gray-50">
+              {{ locale === 'en' ? 'Contact Settings' : '聯絡我們設定' }}
+            </Link>
             <Link :href="route('admin.products.create')" class="px-4 py-2 rounded-xl bg-green-600 text-white hover:bg-green-700">
-              {{ t('admin.articles.create_bundle') }}
+              {{ t('admin.articles.create_product') || (locale === 'en' ? 'Create Product & Service' : '新增產品與服務') }}
             </Link>
           </div>
     </header>
@@ -124,8 +111,7 @@ watch(() => props.items, () => dumpAll('items updated'), { deep: true })
           <tr>
             <th class="text-left px-4 py-3 font-medium">{{ t('admin.articles.slug') }}</th>
             <th class="text-left px-4 py-3 font-medium">{{ t('admin.articles.product') }}</th>
-            <th class="text-left px-4 py-3 font-medium">{{ t('admin.articles.application') }}</th>
-            <th class="text-left px-4 py-3 font-medium">{{ t('admin.articles.case') }}</th>
+            <th class="text-left px-4 py-3 font-medium">{{ t('admin.articles.status') || (locale === 'en' ? 'Status' : '狀態') }}</th>
             <th class="text-left px-4 py-3 font-medium">{{ t('admin.articles.last_updated') }}</th>
             <th class="text-left px-4 py-3 font-medium">{{ t('admin.articles.actions') }}</th>
           </tr>
@@ -134,49 +120,23 @@ watch(() => props.items, () => dumpAll('items updated'), { deep: true })
           <tr v-for="row in items.data" :key="row.product_id" class="border-t">
             <td class="px-4 py-3 font-mono text-xs md:text-sm">{{ row.slug }}</td>
 
-            <!-- 產品 -->
+            <!-- 產品名稱 -->
             <td class="px-4 py-3">
               <div class="font-medium">{{ row.product_title || t('admin.articles.no_title') }}</div>
+            </td>
+
+            <!-- 狀態 -->
+            <td class="px-4 py-3">
               <div
-                class="mt-1 inline-flex items-center px-2 py-0.5 rounded text-xs"
+                class="inline-flex items-center px-2 py-0.5 rounded text-xs"
                 :class="row.product_status === 'published'
                   ? 'bg-green-50 text-green-700 ring-1 ring-green-600/20'
                   : 'bg-gray-100 text-gray-700'"
               >
-                {{ row.product_status || '—' }}
+                {{ row.product_status === 'published' 
+                  ? (locale === 'en' ? 'Published' : '已發布')
+                  : (locale === 'en' ? 'Draft' : '草稿') }}
               </div>
-            </td>
-
-            <!-- 應用 -->
-            <td class="px-4 py-3">
-              <div v-if="row.application_id">
-                <div class="font-medium">{{ row.application_title || t('admin.articles.none') }}</div>
-                <div
-                  class="mt-1 inline-flex items-center px-2 py-0.5 rounded text-xs"
-                  :class="row.application_status === 'published'
-                    ? 'bg-green-50 text-green-700 ring-1 ring-green-600/20'
-                    : 'bg-gray-100 text-gray-700'"
-                >
-                  {{ row.application_status || '—' }}
-                </div>
-              </div>
-              <div v-else class="text-gray-400">—</div>
-            </td>
-
-            <!-- 案例 -->
-            <td class="px-4 py-3">
-              <div v-if="row.case_id">
-                <div class="font-medium">{{ row.case_title || t('admin.articles.none') }}</div>
-                <div
-                  class="mt-1 inline-flex items-center px-2 py-0.5 rounded text-xs"
-                  :class="row.case_status === 'published'
-                    ? 'bg-green-50 text-green-700 ring-1 ring-green-600/20'
-                    : 'bg-gray-100 text-gray-700'"
-                >
-                  {{ row.case_status || '—' }}
-                </div>
-              </div>
-              <div v-else class="text-gray-400">—</div>
             </td>
 
             <td class="px-4 py-3 text-gray-600">
@@ -207,7 +167,7 @@ watch(() => props.items, () => dumpAll('items updated'), { deep: true })
           </tr>
 
           <tr v-if="!items.data?.length">
-            <td colspan="6" class="px-4 py-10 text-center text-gray-500">{{ t('admin.articles.no_data') }}</td>
+            <td colspan="5" class="px-4 py-10 text-center text-gray-500">{{ t('admin.articles.no_data') }}</td>
           </tr>
         </tbody>
       </table>

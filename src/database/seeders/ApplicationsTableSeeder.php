@@ -17,7 +17,10 @@ class ApplicationsTableSeeder extends Seeder
                 'content' => '以感測資料與 AI 達成降本增效。',
                 'cover_url' => null,
                 'status' => 'published',
-                'created_at' => now(), 'updated_at' => now(),
+                'product_id' => null,
+                'sort' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
                 'slug' => 'smart-building',
@@ -26,7 +29,10 @@ class ApplicationsTableSeeder extends Seeder
                 'content' => '舒適度與節能兼顧。',
                 'cover_url' => null,
                 'status' => 'published',
-                'created_at' => now(), 'updated_at' => now(),
+                'product_id' => null,
+                'sort' => 2,
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
         ]);
     }

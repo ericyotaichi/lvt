@@ -11,17 +11,23 @@ const props = defineProps({
 const page = usePage()
 const locale = computed(() => page.props.locale || 'zh')
 
-// 左側章節導覽
-const sections = [
-  { id: 'intro',   label: '公司介紹' },
-
-  { id: 'contact', label: '聯絡我們' },
-]
+// 左側章節導覽（依語系）
+const sections = computed(() =>
+  locale.value === 'en'
+    ? [
+        { id: 'intro', label: 'Company Introduction' },
+        { id: 'contact', label: 'Contact Us' },
+      ]
+    : [
+        { id: 'intro', label: '公司介紹' },
+        { id: 'contact', label: '聯絡我們' },
+      ]
+)
 
 const active = ref('intro')
 let observer
 onMounted(() => {
-  const els = sections.map(s => document.getElementById(s.id)).filter(Boolean)
+  const els = (sections.value || []).map(s => document.getElementById(s.id)).filter(Boolean)
   observer = new IntersectionObserver((entries) => {
     const visible = entries
       .filter(e => e.isIntersecting)
@@ -41,6 +47,7 @@ const introContent = computed(() => {
 const imageUrl = computed(() => {
   return props.about?.image_url || null
 })
+
 </script>
 
 <script>
@@ -50,15 +57,15 @@ export default { layout: AppLayout }
 </script>
 
 <template>
-  <Head title="關於我們" />
+  <Head :title="locale === 'en' ? 'About Us' : '關於我們'" />
 
   <!-- Hero -->
   <section class="relative overflow-hidden border rounded-3xl bg-gradient-to-br from-green-50 to-blue-50">
     <div class="max-w-7xl mx-auto px-6 py-14 md:py-20">
       <p class="text-sm text-green-700 font-semibold">ABOUT US</p>
-      <h1 class="mt-2 text-3xl md:text-5xl font-bold tracking-tight">村源科技股份有限公司</h1>
+      <h1 class="mt-2 text-3xl md:text-5xl font-bold tracking-tight">{{ locale === 'en' ? 'Chun Yuan Tech. Co., Ltd' : '村源科技股份有限公司' }}</h1>
       <p class="mt-4 max-w-2xl text-gray-600">
-        以人為本・健康・節能
+        {{ locale === 'en' ? 'People-oriented, Health, Energy-saving' : '以人為本・健康・節能' }}
       </p>
     </div>
   </section>
@@ -85,26 +92,26 @@ export default { layout: AppLayout }
       <section id="intro" class="scroll-mt-28">
         <div class="grid lg:grid-cols-2 gap-8 items-center">
           <div>
-            <h2 class="text-2xl md:text-3xl font-bold">公司介紹</h2>
+            <h2 class="text-2xl md:text-3xl font-bold">{{ locale === 'en' ? 'Company Introduction' : '公司介紹' }}</h2>
             <p v-if="introContent" class="mt-4 text-gray-600 leading-7 whitespace-pre-line">
               {{ introContent }}
             </p>
             <p v-else class="mt-4 text-gray-600 leading-7">
-              村源科技股份有限公司秉持「以人為本、健康、節能」為核心價值，致力於打造兼具永續發展與人本關懷的工程技術解決方案。
+              {{ locale === 'en' ? 'Chun Yuan Tech. Co., Ltd upholds "People-oriented, Health, Energy-saving" as core values, committed to providing sustainable and human-centric engineering solutions.' : '村源科技股份有限公司秉持「以人為本、健康、節能」為核心價值，致力於打造兼具永續發展與人本關懷的工程技術解決方案。' }}
             </p>
-            <ul class="mt-6 grid sm:grid-cols-2 gap-3 text-sm">
+            <!-- <ul class="mt-6 grid sm:grid-cols-2 gap-3 text-sm">
               <li class="p-3 rounded-xl border bg-white">從「人」出發，打造安全舒適的工作與生活環境</li>
               <li class="p-3 rounded-xl border bg-white">從「健康」著眼，優化空氣與環境品質</li>
               <li class="p-3 rounded-xl border bg-white">以「節能」為目標，提升系統效率、減少資源浪費</li>
               <li class="p-3 rounded-xl border bg-white">以「解決問題」為核心，創造具體、可衡量的工程價值</li>
-            </ul>
+            </ul> -->
           </div>
           <div>
             <!-- 公司形象圖 -->
             <img 
               v-if="imageUrl" 
               :src="imageUrl" 
-              alt="公司介紹" 
+              :alt="locale === 'en' ? 'Company Introduction' : '公司介紹'" 
               class="aspect-[4/3] rounded-2xl border object-cover w-full"
             />
             <div v-else class="aspect-[4/3] rounded-2xl border bg-gray-100"></div>
@@ -215,12 +222,12 @@ export default { layout: AppLayout }
         <div class="rounded-3xl overflow-hidden border bg-gradient-to-r from-green-600 to-blue-600 text-white p-8 md:p-12">
           <div class="grid md:grid-cols-2 items-center gap-6">
             <div>
-              <h3 class="text-2xl font-semibold">想更了解我們？</h3>
-              <p class="mt-2 text-white/90">留下需求與聯絡方式，我們將儘速回覆。</p>
+              <h3 class="text-2xl font-semibold">{{ locale === 'en' ? 'Want to know more about us?' : '想更了解我們？' }}</h3>
+              <p class="mt-2 text-white/90">{{ locale === 'en' ? 'Leave your needs and contact info, and we will get back to you soon.' : '留下需求與聯絡方式，我們將儘速回覆。' }}</p>
             </div>
             <div class="md:text-right">
               <Link href="/lead" class="inline-block px-5 py-2.5 rounded-xl bg-white text-green-700 font-medium hover:bg-gray-100">
-                聯絡我們
+                {{ locale === 'en' ? 'Contact Us' : '聯絡我們' }}
               </Link>
             </div>
           </div>
