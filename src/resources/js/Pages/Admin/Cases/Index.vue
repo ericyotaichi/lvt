@@ -85,7 +85,6 @@ export default { layout: AppLayout }
       <table class="min-w-full text-sm">
         <thead class="bg-gray-50">
           <tr>
-            <th class="text-left px-4 py-3 font-medium">Slug</th>
             <th class="text-left px-4 py-3 font-medium">案例名稱</th>
             <th class="text-left px-4 py-3 font-medium">客戶名稱</th>
             <th class="text-left px-4 py-3 font-medium">狀態</th>
@@ -95,7 +94,6 @@ export default { layout: AppLayout }
         </thead>
         <tbody>
           <tr v-for="row in items.data" :key="row.id" class="border-t">
-            <td class="px-4 py-3 font-mono text-xs md:text-sm">{{ row.slug }}</td>
             <td class="px-4 py-3">
               <div class="font-medium">{{ row.title }}</div>
             </td>

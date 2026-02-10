@@ -106,7 +106,7 @@ class LeadController extends Controller
             ]);
 
             try {
-                Mail::to('eric12076@gmail.com')->send(new LeadSubmitted($lead));
+                Mail::to('t0921206292@gmail.com')->send(new LeadSubmitted($lead));
                 Log::info('Lead notification email dispatched', ['lead_id' => $lead->id]);
             } catch (\Throwable $mailException) {
                 Log::error('Lead notification email failed', [

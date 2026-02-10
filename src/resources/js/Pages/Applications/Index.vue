@@ -32,7 +32,6 @@ const getAnchorId = (key) => `application-category-${key}`
   <Head :title="t('applications_section.title')" />
   <section id="application-list">
     <h1 class="text-3xl font-bold">{{ t('applications_section.title') }}</h1>
-    <p class="mt-2 text-gray-600">{{ t('applications_section.description') }}</p>
   </section>
 
   <div v-if="normalizedCategories.length" class="mt-8 space-y-12">
@@ -42,14 +41,9 @@ const getAnchorId = (key) => `application-category-${key}`
       :id="getAnchorId(category.key)"
       class="scroll-mt-28 space-y-4"
     >
-      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
-        <h2 class="text-2xl font-bold">
-          {{ index + 1 }}. {{ category.title }}
-        </h2>
-        <p class="text-sm text-gray-500">
-          {{ t('applications_section.description') }}
-        </p>
-      </div>
+      <h2 class="text-2xl font-bold">
+        {{ index + 1 }}. {{ category.title }}
+      </h2>
 
       <div v-if="category.items.length" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
         <article

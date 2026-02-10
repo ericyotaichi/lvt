@@ -109,7 +109,6 @@ export default { layout: AppLayout }
       <table class="min-w-full text-sm">
         <thead class="bg-gray-50">
           <tr>
-            <th class="text-left px-4 py-3 font-medium">{{ t('admin.articles.slug') }}</th>
             <th class="text-left px-4 py-3 font-medium">{{ t('admin.articles.product') }}</th>
             <th class="text-left px-4 py-3 font-medium">{{ t('admin.articles.status') || (locale === 'en' ? 'Status' : '狀態') }}</th>
             <th class="text-left px-4 py-3 font-medium">{{ t('admin.articles.last_updated') }}</th>
@@ -118,8 +117,6 @@ export default { layout: AppLayout }
         </thead>
         <tbody>
           <tr v-for="row in items.data" :key="row.product_id" class="border-t">
-            <td class="px-4 py-3 font-mono text-xs md:text-sm">{{ row.slug }}</td>
-
             <!-- 產品名稱 -->
             <td class="px-4 py-3">
               <div class="font-medium">{{ row.product_title || t('admin.articles.no_title') }}</div>

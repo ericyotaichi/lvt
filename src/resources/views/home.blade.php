@@ -56,10 +56,7 @@
 
     {{-- 產品與服務（7 項，卡片樣式） --}}
     <section class="mt-14">
-        <div class="flex items-end justify-between">
-            <h2 class="text-2xl font-bold">產品與服務內容</h2>
-            <a href="/products" class="text-sm text-blue-700 hover:underline">查看全部 →</a>
-        </div>
+        <h2 class="text-2xl font-bold">產品與服務內容</h2>
         <div class="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             @php
                 $products = [

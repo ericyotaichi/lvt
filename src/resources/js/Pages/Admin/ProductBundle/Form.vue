@@ -19,7 +19,6 @@ const coverInputRef = ref(null)
 
 const form = useForm({
   // product only
-  slug: props.product?.slug ?? '',
   title: props.product?.title ?? '',
   title_en: props.product?.title_en ?? '',
   summary: props.product?.summary ?? '',
@@ -135,11 +134,6 @@ export default { layout: AppLayout }
           <label class="block text-sm font-medium">產品名稱 (English)</label>
           <input v-model="form.title_en" type="text" class="mt-1 w-full rounded-xl border px-3 py-2" />
           <p v-if="form.errors.title_en" class="text-sm text-red-600">{{ form.errors.title_en }}</p>
-        </div>
-        <div>
-          <label class="block text-sm font-medium">Slug</label>
-          <input v-model="form.slug" type="text" class="mt-1 w-full rounded-xl border px-3 py-2" placeholder="留空自動產生" />
-          <p v-if="form.errors.slug" class="text-sm text-red-600">{{ form.errors.slug }}</p>
         </div>
         <div>
           <label class="block text-sm font-medium">狀態</label>
