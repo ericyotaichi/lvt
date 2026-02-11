@@ -20,7 +20,7 @@
             </a>
             <nav class="hidden md:flex items-center gap-6 text-sm">
                 <a href="/tech" class="hover:text-green-700">核心技術</a>
-                <a href="/products" class="hover:text-green-700">產品與服務內容</a>
+                <a href="/products" class="hover:text-green-700">產品與服務</a>
                 <a href="/applications" class="hover:text-green-700">應用場域</a>
                 <a href="/cases" class="hover:text-green-700">案例說明</a>
                 <a href="/co-creation" class="hover:text-green-700">共創機遇</a>

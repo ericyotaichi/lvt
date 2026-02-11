@@ -123,7 +123,7 @@ export default { layout: AppLayout }
   <form @submit.prevent="submit" class="space-y-6">
     <!-- 產品與服務 -->
     <section class="rounded-2xl border bg-white p-6">
-      <h2 class="text-xl font-semibold mb-4">產品與服務內容</h2>
+      <h2 class="text-xl font-semibold mb-4">產品與服務</h2>
       <div class="mt-4 grid gap-4 md:grid-cols-2">
         <div>
           <label class="block text-sm font-medium">產品名稱 (中文) *</label>

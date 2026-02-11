@@ -23,7 +23,7 @@ return [
         'quick_deployment_desc' => '模組化方案與專業顧問，縮短導入時程',
         'core_technology_highlight' => '結合感測、數據分析與自動化控制，打造高效率且穩定的場域。',
         'core_technology_cta' => '了解核心技術',
-        'products_services' => '產品與服務內容',
+        'products_services' => '產品與服務',
         'applications' => '應用場域',
         'applications_desc' => '完整的產業場域案例，完成表單後即可瀏覽。',
         'go_to_applications' => '前往應用場域',

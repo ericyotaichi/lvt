@@ -42,7 +42,7 @@ const getAnchorId = (key) => `application-category-${key}`
       class="scroll-mt-28 space-y-4"
     >
       <h2 class="text-2xl font-bold">
-        {{ index + 1 }}. {{ category.title }}
+        {{ category.title }}
       </h2>
 
       <div v-if="category.items.length" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
